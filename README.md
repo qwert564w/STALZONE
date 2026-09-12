@@ -2,76 +2,76 @@
 
 **COPYRIGHT VV.EXE Development Team 2026. All rights reserved.**
 
-## Overview
+## QUICK START (NO ADMIN REQUIRED)
 
-Advanced IL2CPP cheat client for STALZONE with comprehensive bypass capabilities.
+### Step 1: Auto Setup
+Run `auto_setup.bat` - it will automatically:
+- Download CMake (portable)
+- Download MinHook
+- Download ImGui
+- Download Il2CppDumper
+- Compile vv.dll
 
-## Features
+### Step 2: Launch Game with UAC Bypass
+Run `bypass_and_run.bat` - it will:
+- Launch game WITHOUT UAC prompt
+- No admin password needed
+- Uses computerdefaults.exe method
 
-### Combat Modules
-- Aimbot with prediction and humanization
-- Silent Aim - override shoot angles
-- Triggerbot with random delay
-- No Recoil with randomization
-- No Spread reduction
-- FOV Circle indicator
+### Step 3: Inject with Extreme Injector v3
+1. Wait for game to reach main menu
+2. Open Extreme Injector v3 (NO ADMIN NEEDED)
+3. Select game process (STALKER.exe or similar)
+4. Add `output\vv.dll`
+5. Click INJECT
 
-### Visual Modules
-- Player ESP (boxes, names, health, bones)
-- Loot ESP with rarity colors
-- Corpse ESP with loot list
-- Chams with visible-only mode
-- Artifact Glow with rarity effects
-- Anomaly ESP with pulsing
+### Step 4: Use Cheat
+- **Right Shift** - Toggle menu
+- **Insert** - Toggle menu (backup)
+- **ESC** - Close menu
 
-### Bypass Features
-- Multi-method UAC Bypass
-- Manual Map Injection
-- Screenshot Bypass
-- String Obfuscation
-- Offset Encryption
+## ENGINE SUPPORT
 
-## Requirements
+This cheat supports:
+- X-Ray Engine (S.T.A.L.K.E.R. series)
+- Unreal Engine 4/5
+- Unity (IL2CPP)
 
-- Windows 10/11 x64
-- Visual Studio 2022
-- CMake 3.20+
-- Python 3.8+
-- Il2CppDumper
+The code automatically detects engine type and uses appropriate hooks.
 
-## Installation
+## ANTI-CHEAT BYPASS
 
-1. Clone repository
-2. Run tools/build.bat
-3. Update offsets with python tools/dump_offsets.py
+For EXBO / EAC / BattlEye:
+- Use Manual Map injection in Extreme Injector
+- Enable "Stealth Inject" option
+- Wait 10 seconds after game start before injecting
 
-## Usage
+## TROUBLESHOOTING
 
-### Method 1: Using Loader
-1. Run loader/loader.exe
-2. Select option 1
-3. Wait for injection
+**Menu doesn't open:**
+- Press Right Shift or Insert
+- Check if DLL injected successfully
 
-### Method 2: Manual Launch
-1. Run tools/start_game.bat
-2. Select option 2 (UAC BYPASS)
-3. Select option 3 (Inject)
+**Game crashes on inject:**
+- Disable Steam Overlay
+- Use Manual Map injection
+- Inject after reaching main menu
 
-### In-Game Menu
-- Right Mouse Button - Toggle menu
-- ESC - Close menu
+**UAC bypass not working:**
+- Try running bypass_and_run.bat as admin manually
+- Some Windows builds block computerdefaults method
 
-## Server-Side Validation Warnings
+## FILE STRUCTURE
 
-**Important:** Some features may be detected:
-- Silent Aim - if shoot angles validated server-side
-- No Recoil - if recoil patterns checked
-- Triggerbot - if reaction times too consistent
-- ESP Features - generally safe (client-side only)
+STALZONE/
+- auto_setup.bat       (Auto download and compile)
+- bypass_and_run.bat   (Launch game without UAC)
+- output/vv.dll        (Compiled cheat)
+- src/                 (Source code)
+- libs/                (Downloaded libraries)
+- tools/               (Build tools)
 
-**Recommendation:** Use conservatively with randomization.
-
-## Contact
+## CONTACT
 
 vv.exe.development@protonmail.com
 
