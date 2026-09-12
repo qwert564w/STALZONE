@@ -1,12 +1,8 @@
 #pragma once
-#include <imgui.h>
-#include <string>
+#include "imgui.h"
 namespace Widgets {
-    bool Toggle(const char* id, bool* value);
-    bool Slider(const char* id, const char* label, float* value, float min, float max, const char* fmt = "%.1f");
-    bool SliderInt(const char* id, const char* label, int* value, int min, int max, const char* fmt = "%d");
-    bool FeatureCardStart(const char* id, const char* name, bool* enabled, bool* expanded);
-    void FeatureCardEnd();
-    bool SettingRow(const char* label);
-    void SectionGroup(const char* label);
+    bool Toggle(const char* label, bool* v);
+    bool Slider(const char* label, float* v, float min, float max);
+    bool Keybind(const char* label, int* key);
+    void FeatureCard(const char* name, bool enabled);
 }
