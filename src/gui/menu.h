@@ -1,0 +1,3 @@
+#pragma once
+#include <imgui.h>
+namespace Menu { struct Tab { const char* name; const char* icon; void (*render)(); }; extern int currentTab; extern bool visible; void Init(); void Render(); void Shutdown(); void RenderCombat(); void RenderVisual(); void RenderPlayers(); void RenderAuction(); void RenderWorld(); void RenderMisc(); void RenderConfig(); void RenderTheme(); bool FeatureCard(const char* id, const char* name, bool* enabled); }
