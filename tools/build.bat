@@ -1,35 +1,88 @@
 @echo off
-:: COPYRIGHT VV.EXE Development Team 2026
-echo ==========================================
-echo    VV.EXE BUILD SYSTEM - STALZONE
-echo ==========================================
+echo ======================================
+echo   VV.EXE Build Script
+echo   COPYRIGHT VV.EXE Development Team 2026
+echo ======================================
+echo.
 
-echo [1/3] Building main cheat DLL (vv.dll)...
-if not exist "build" mkdir build
-cd build
-cmake .. -G "Visual Studio 17 2022" -A x64
-cmake --build . --config Release
-cd ..
+echo [BUILD] Starting build process...
+echo.
 
-if not exist "build\Release\vv.dll" (
-    echo [!] Failed to build vv.dll. Check CMake errors.
+:: Проверяем наличие CMake
+where cmake >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [BUILD] ERROR: CMake not found! Please install CMake.
     pause
     exit /b 1
 )
 
-echo [2/3] Building UAC Bypass tool...
-:: Compile uac_bypass.cpp using cl.exe (Visual Studio Compiler)
-:: Ensure you run this from a "x64 Native Tools Command Prompt for VS 2022"
-cl /EHsc /O2 tools\uac_bypass.cpp /Fe:tools\uac_bypass.exe /link user32.lib advapi32.lib shell32.lib > nul 2>&1
-if not exist "tools\uac_bypass.exe" (
-    echo [!] Warning: Failed to compile uac_bypass.exe. You might need to compile it manually in Visual Studio.
+:: Проверяем наличие cl.exe
+where cl >nul 2>nul
+if %errorlevel% neq 0 (
+    echo [BUILD] ERROR: cl.exe not found! Please run from Visual Studio Developer Command Prompt.
+    pause
+    exit /b 1
 )
 
-echo [3/3] Running string checks on vv.dll...
-python tools\check_strings.py build\Release\vv.dll
+:: Создаём директорию build
+if not exist build mkdir build
+cd build
 
-echo ==========================================
-echo    BUILD COMPLETE!
-echo    Output: build\Release\vv.dll
-echo ==========================================
+:: Запускаем CMake
+echo [BUILD] Running CMake...
+cmake .. -G "Visual Studio 17 2022" -A x64
+if %errorlevel% neq 0 (
+    echo [BUILD] ERROR: CMake configuration failed!
+    cd ..
+    pause
+    exit /b 1
+)
+
+:: Компилируем проект
+echo [BUILD] Building project...
+cmake --build . --config Release
+if %errorlevel% neq 0 (
+    echo [BUILD] ERROR: Build failed!
+    cd ..
+    pause
+    exit /b 1
+)
+
+echo [BUILD] ✓ vv.dll compiled successfully!
+echo.
+
+:: Копируем DLL в корневую директорию
+copy /y Release\vv.dll ..\vv.dll >nul
+echo [BUILD] ✓ vv.dll copied to root directory
+echo.
+
+:: Компилируем UAC Bypass
+echo [BUILD] Compiling UAC Bypass v2...
+cd ..
+cl /EHsc /O2 tools\uac_bypass_v2.cpp /link advapi32.lib shell32.lib shlwapi.lib /Fe:build\uac_bypass_v2.exe
+if %errorlevel% neq 0 (
+    echo [BUILD] WARNING: UAC Bypass compilation failed!
+) else (
+    echo [BUILD] ✓ uac_bypass_v2.exe compiled successfully!
+)
+echo.
+
+:: Проверяем строки на детект
+echo [BUILD] Running string checker...
+python tools\check_strings.py vv.dll
+if %errorlevel% neq 0 (
+    echo [BUILD] WARNING: Suspicious strings found in DLL!
+) else (
+    echo [BUILD] ✓ No suspicious strings found
+)
+echo.
+
+echo ======================================
+echo   Build completed successfully!
+echo ======================================
+echo.
+echo Files created:
+echo   - vv.dll (main cheat DLL)
+echo   - uac_bypass_v2.exe (UAC bypass tool)
+echo.
 pause
