@@ -1,11 +1,22 @@
+// COPYRIGHT VV.EXE Development Team 2026. All rights reserved.
 #pragma once
-#include "../module.h"
+#include <cstdint>
+
+namespace VV {
 namespace Combat {
-    class NoSpread : public Module {
-    public:
-        NoSpread() { name = "no_spread"; }
-        void OnUpdate() override;
-        void OnRenderMenu() override;
-        void OnRenderOverlay() override;
-    };
-}
+
+class NoSpread {
+public:
+    static bool s_enabled;
+    static float s_reductionPercent;
+    
+    static void OnUpdate();
+    static void OnRenderMenu();
+    static void OnRenderOverlay();
+    
+private:
+    static void ReduceSpread();
+};
+
+} // namespace Combat
+} // namespace VV
