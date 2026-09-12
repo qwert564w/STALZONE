@@ -1,3 +1,0 @@
-#pragma once
-#include <imgui.h>
-namespace Widgets { bool Toggle(const char* id, bool* value); bool Keybind(const char* id, int* key, bool capturing); bool Slider(const char* id, const char* label, float* value, float min, float max, const char* fmt = "%.0f"); bool ColorPick(const char* id, ImVec4* color); bool SectionHeader(const char* title, const char* icon); bool Collapsible(const char* id, const char* name, bool* enabled, bool* expanded); }
