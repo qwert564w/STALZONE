@@ -4,10 +4,8 @@
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_opengl3.h"
-
 using tSwapBuffers = BOOL(WINAPI*)(HDC);
 tSwapBuffers oSwapBuffers = nullptr;
-
 BOOL WINAPI hSwapBuffers(HDC hdc) {
     static bool init = false;
     if (!init) {
@@ -25,11 +23,8 @@ BOOL WINAPI hSwapBuffers(HDC hdc) {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     return oSwapBuffers(hdc);
 }
-
 void OpenGLHook::Install() {
     HMODULE hOpenGL = GetModuleHandleA("opengl32.dll");
-    if (hOpenGL) {
-        oSwapBuffers = (tSwapBuffers)GetProcAddress(hOpenGL, "wglSwapBuffers");
-    }
+    if (hOpenGL) oSwapBuffers = (tSwapBuffers)GetProcAddress(hOpenGL, "wglSwapBuffers");
 }
 void OpenGLHook::Uninstall() { }

@@ -12,9 +12,7 @@ namespace Menu {
         ImGui::BeginChild("Sidebar", ImVec2(150, 0), true);
         const char* tabs[] = {"Combat", "Visual", "Players", "Auction", "World", "Misc"};
         static int active = 0;
-        for (int i = 0; i < 6; i++) {
-            if (ImGui::Selectable(tabs[i], active == i)) active = i;
-        }
+        for (int i = 0; i < 6; i++) { if (ImGui::Selectable(tabs[i], active == i)) active = i; }
         ImGui::EndChild();
         ImGui::SameLine();
         ImGui::BeginChild("Content");
