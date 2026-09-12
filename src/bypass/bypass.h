@@ -3,5 +3,6 @@
 namespace Bypass {
     void Init();
     void HideModule(HMODULE hMod);
-    void SpoofCallAddress();
+    void AntiDebug();
+    void AntiDump();
 }
