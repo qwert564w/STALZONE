@@ -1,7 +1,7 @@
 {
-    "version": "1.0.0",
-    "dllUrl": "https://raw.githubusercontent.com/qwert564w/STALZONE/main/build/Release/vv.dll",
-    "installPath": "C:\\Temp\\vv.dll",
-    "gameExe": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\STALZONE\\game.exe",
-    "autoInject": true
+    "dll_url": "https://example.com/vv.dll",
+    "install_path": "C:\\VV\\vv.dll",
+    "game_exe": "C:\\Games\\STALZONE\\game.exe",
+    "game_process_name": "game.exe",
+    "wait_time": 10
 }
