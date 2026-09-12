@@ -21,6 +21,7 @@ namespace GUI {
 
 bool s_menuOpen = false;
 int s_currentTab = 0;
+bool s_initialized = false;
 
 void ToggleMenu() {
     s_menuOpen = !s_menuOpen;
@@ -30,27 +31,47 @@ bool IsMenuOpen() {
     return s_menuOpen;
 }
 
-void RenderMenu() {
-    // Проверяем нажатия клавиш
-    if (GetAsyncKeyState(VK_RBUTTON) & 1) {
-        ToggleMenu();
+void HandleInput() {
+    if (GetAsyncKeyState(VK_RSHIFT) & 0x8000) {
+        static bool lastState = false;
+        if (!lastState) {
+            ToggleMenu();
+        }
+        lastState = true;
+    } else {
+        if (GetAsyncKeyState(VK_INSERT) & 0x8000) {
+            static bool lastState2 = false;
+            if (!lastState2) {
+                ToggleMenu();
+            }
+            lastState2 = true;
+        } else {
+            static bool lastState = false;
+            static bool lastState2 = false;
+            lastState = false;
+            lastState2 = false;
+        }
     }
     
-    if (GetAsyncKeyState(VK_ESCAPE) & 1) {
-        s_menuOpen = false;
+    if (GetAsyncKeyState(VK_ESCAPE) & 0x8000) {
+        if (s_menuOpen) {
+            s_menuOpen = false;
+        }
     }
+}
+
+void RenderMenu() {
+    HandleInput();
     
     if (!s_menuOpen) return;
     
-    // Рисуем окно меню
     float menuX = 100.0f;
     float menuY = 100.0f;
     float menuWidth = 600.0f;
     float menuHeight = 500.0f;
     
-    Widgets::WindowStart("VV.EXE Menu", menuX, menuY, menuWidth, menuHeight);
+    Widgets::WindowStart("VV.EXE Menu [Right Shift]", menuX, menuY, menuWidth, menuHeight);
     
-    // Рисуем вкладки
     const char* tabs[] = {"Combat", "Visual", "Misc", "Bypass", "Settings"};
     int numTabs = sizeof(tabs) / sizeof(tabs[0]);
     
@@ -60,9 +81,7 @@ void RenderMenu() {
         }
     }
     
-    // Рисуем содержимое вкладки
     if (s_currentTab == 0) {
-        // Combat Tab
         Widgets::FeatureCardStart("Aimbot");
         Combat::Aimbot::OnRenderMenu();
         Widgets::FeatureCardEnd();
@@ -88,7 +107,6 @@ void RenderMenu() {
         Widgets::FeatureCardEnd();
     }
     else if (s_currentTab == 1) {
-        // Visual Tab
         Widgets::FeatureCardStart("Player ESP");
         Visual::PlayerESP::OnRenderMenu();
         Widgets::FeatureCardEnd();
@@ -114,12 +132,9 @@ void RenderMenu() {
         Widgets::FeatureCardEnd();
     }
     else if (s_currentTab == 2) {
-        // Misc Tab
-        // Здесь будут другие модули (bhop, radar и т.д.)
         Widgets::Text("Misc features coming soon...");
     }
     else if (s_currentTab == 3) {
-        // Bypass Tab
         Widgets::FeatureCardStart("Anti-Cheat Bypass");
         Widgets::Text("Select bypass strategy:");
         static int bypassMode = 0;
@@ -134,14 +149,14 @@ void RenderMenu() {
         Widgets::FeatureCardEnd();
     }
     else if (s_currentTab == 4) {
-        // Settings Tab
         Widgets::FeatureCardStart("Menu Settings");
         static float menuOpacity = 1.0f;
         Widgets::Slider("Menu Opacity", &menuOpacity, 0.1f, 1.0f);
         Widgets::FeatureCardEnd();
         
         Widgets::FeatureCardStart("Keybinds");
-        Widgets::Text("Right Mouse Button - Toggle Menu");
+        Widgets::Text("Right Shift - Toggle Menu");
+        Widgets::Text("Insert - Toggle Menu (backup)");
         Widgets::Text("ESC - Close Menu");
         Widgets::FeatureCardEnd();
     }
@@ -150,7 +165,6 @@ void RenderMenu() {
 }
 
 void RenderOverlay() {
-    // Рендерим overlay для всех модулей
     Combat::Aimbot::OnRenderOverlay();
     Combat::SilentAim::OnRenderOverlay();
     Combat::Triggerbot::OnRenderOverlay();
