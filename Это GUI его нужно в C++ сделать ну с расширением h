@@ -1,0 +1,2746 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>VV.EXE</title>
+<style>
+  :root {
+    --accent: #475569;
+    --accent-rgb: 71, 85, 105;
+    --accent-bright: #64748b;
+    --accent-dark: #1e293b;
+    --win-bg: #ffffff;
+    --win-bg-rgb: 255, 255, 255;
+    --win-opacity: 0.94;
+    --sidebar-bg: #fafafa;
+    --sidebar-bg-rgb: 250, 250, 250;
+    --panel-bg: #f4f4f5;
+    --panel-bg-rgb: 244, 244, 245;
+    --input-bg: #ffffff;
+    --input-bg-rgb: 255, 255, 255;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --text: #18181b;
+    --text-bright: #000000;
+    --text-mid: #52525b;
+    --text-dim: #71717a;
+    --text-faint: #a1a1aa;
+    --shadow: rgba(0, 0, 0, 0.08);
+    --shadow-strong: rgba(0, 0, 0, 0.15);
+    --good: #16a34a;
+    --bad: #dc2626;
+    --bad-rgb: 220, 38, 38;
+    --warn: #d97706;
+    --radius: 8px;
+    --radius-sm: 5px;
+    --radius-lg: 10px;
+    --font-scale: 1;
+
+    --feature-on-bg: #1a1a1a;
+    --feature-on-bg-hover: #202020;
+    --feature-on-border: #2e2e2e;
+    --feature-on-border-hover: #3e3e3e;
+    --feature-on-text: #f0f0f0;
+    --feature-on-text-mid: #b8b8b8;
+    --feature-on-text-dim: #8a8a8a;
+    --feature-on-panel: rgba(0, 0, 0, 0.35);
+    --feature-on-element: rgba(255, 255, 255, 0.06);
+    --feature-on-element-border: #3a3a3a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: calc(12px * var(--font-scale)); }
+  html, body {
+    width: 100%; height: 100%;
+    background: #0a0a0a;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    overflow: hidden;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  body { font-size: 1rem; }
+
+  .menu {
+    position: absolute;
+    top: 40px; left: 60px;
+    width: 600px;
+    height: 500px;
+    background: rgba(var(--win-bg-rgb), var(--win-opacity));
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow:
+      0 8px 32px var(--shadow-strong),
+      0 2px 8px var(--shadow);
+    z-index: 10;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background .2s, border-radius .2s;
+  }
+
+  #particles-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity .4s;
+  }
+  #particles-canvas.hidden { opacity: 0; }
+
+  .titlebar {
+    position: relative;
+    z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0;
+    background: rgba(var(--sidebar-bg-rgb), 0.75);
+    border-bottom: 1px solid var(--border);
+    cursor: move;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    height: 40px;
+    backdrop-filter: blur(8px);
+    transition: background .2s;
+  }
+
+  .titlebar h1 {
+    font-size: 1rem; font-weight: 700;
+    color: var(--text-bright);
+    display: flex; align-items: center; gap: 11px;
+    padding-left: 14px;
+    letter-spacing: -0.02em;
+  }
+  .titlebar h1 .logo-mark {
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent);
+    border-radius: 6px;
+    flex-shrink: 0;
+    transition: background .2s;
+  }
+  .titlebar h1 .logo-mark svg {
+    width: 15px; height: 15px;
+    stroke: #ffffff; fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .titlebar h1 .title-text {
+    display: flex; flex-direction: column;
+    line-height: 1.05; gap: 1px;
+  }
+  .titlebar h1 .title-main {
+    font-size: 0.958rem; font-weight: 800;
+    letter-spacing: 0.5px; color: var(--text-bright);
+  }
+  .titlebar h1 .title-sub {
+    font-size: 0.667rem; font-weight: 500;
+    color: var(--text-dim);
+    letter-spacing: 0.3px; text-transform: uppercase;
+  }
+
+  .titlebar .controls { display: flex; gap: 4px; padding-right: 8px; }
+  .titlebar .min, .titlebar .close {
+    width: 26px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); cursor: pointer;
+    border-radius: 5px; transition: all .15s;
+    background: transparent;
+  }
+  .titlebar .min svg, .titlebar .close svg {
+    width: 0.917rem; height: 0.917rem;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round;
+  }
+  .titlebar .min:hover {
+    background: rgba(var(--panel-bg-rgb), 0.7);
+    color: var(--text);
+  }
+  .titlebar .close:hover { background: var(--bad); color: #ffffff; }
+
+  .body { display: flex; flex: 1; min-height: 0; position: relative; z-index: 2; }
+
+  .sidebar {
+    width: 120px;
+    background: rgba(var(--sidebar-bg-rgb), 0.55);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 8px 0; flex-shrink: 0;
+    overflow-y: auto;
+    backdrop-filter: blur(6px);
+    transition: background .2s;
+  }
+  .sidebar::-webkit-scrollbar { width: 3px; }
+  .sidebar::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 2px;
+  }
+
+  .tab-btn {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 12px;
+    margin: 1px 8px;
+    color: var(--text-dim);
+    font-size: 0.875rem; font-weight: 500;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all .15s ease;
+    position: relative; flex-shrink: 0;
+  }
+  .tab-btn:hover { color: var(--text); background: rgba(var(--accent-rgb), 0.06); }
+  .tab-btn.active {
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.14);
+    font-weight: 600;
+  }
+  .tab-btn.active .ico svg { stroke: var(--accent); }
+  .tab-btn .ico {
+    width: 15px; height: 15px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .tab-btn .ico svg {
+    width: 1.083rem; height: 1.083rem;
+    stroke: currentColor; stroke-width: 1.7; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke .15s;
+  }
+  .tab-btn .badge {
+    position: absolute; right: 8px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.667rem; font-weight: 700;
+    background: var(--accent); color: #ffffff;
+    padding: 1px 6px; border-radius: 8px;
+    min-width: 18px; text-align: center;
+  }
+  .sidebar-sep {
+    height: 1px; background: var(--border);
+    margin: 8px 16px; flex-shrink: 0;
+  }
+  .sidebar-spacer { flex: 1; min-height: 6px; }
+
+  .content {
+    flex: 1; overflow-y: auto;
+    min-width: 0;
+    display: flex; flex-direction: column;
+    background: rgba(var(--win-bg-rgb), 0.25);
+    transition: background .2s;
+  }
+  .content::-webkit-scrollbar { width: 6px; }
+  .content::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 3px;
+  }
+
+  .tab-panel { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .tab-panel.active { display: flex; }
+
+  .features-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .features-wrap::-webkit-scrollbar { width: 6px; }
+  .features-wrap::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 3px;
+  }
+
+  .feature {
+    background: rgba(var(--panel-bg-rgb), 0.55);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    backdrop-filter: blur(6px);
+    transition: all .2s ease;
+    overflow: hidden;
+  }
+  .feature:hover { border-color: rgba(var(--accent-rgb), 0.35); }
+
+  .feature.on,
+  .feature.expanded {
+    background: var(--feature-on-bg);
+    border-color: var(--feature-on-border);
+  }
+  .feature.on:hover,
+  .feature.expanded:hover {
+    background: var(--feature-on-bg-hover);
+    border-color: var(--feature-on-border-hover);
+  }
+  .feature.on.expanded {
+    background: var(--feature-on-bg);
+    border-color: var(--accent);
+  }
+
+  .feature-head {
+    display: flex; align-items: center;
+    padding: 10px 12px;
+    gap: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .feature-head:hover { background: rgba(var(--accent-rgb), 0.04); }
+  .feature.on .feature-head:hover,
+  .feature.expanded .feature-head:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .feature-gear {
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    color: var(--text-dim);
+    transition: all .15s;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .feature-gear svg {
+    width: 13px; height: 13px;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+    transition: transform .2s;
+  }
+  .feature-gear:hover {
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.1);
+  }
+  .feature.expanded .feature-gear svg { transform: rotate(90deg); }
+
+  .feature.on .feature-gear,
+  .feature.expanded .feature-gear {
+    color: var(--feature-on-text-dim);
+  }
+  .feature.on .feature-gear:hover,
+  .feature.expanded .feature-gear:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .feature.on.expanded .feature-gear { color: var(--accent-bright); }
+
+  .feature-name {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--text);
+    font-weight: 500;
+    transition: color .15s;
+  }
+  .feature.on .feature-name,
+  .feature.expanded .feature-name {
+    color: var(--feature-on-text);
+  }
+  .feature.on.expanded .feature-name {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .feature-status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-faint);
+    padding: 2px 8px;
+    background: rgba(var(--panel-bg-rgb), 0.6);
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+    transition: all .15s;
+  }
+  .feature-status.on {
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.12);
+  }
+  .feature.on .feature-status,
+  .feature.expanded .feature-status {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--feature-on-text-dim);
+  }
+  .feature.on .feature-status.on,
+  .feature.expanded .feature-status.on {
+    background: rgba(var(--accent-rgb), 0.35);
+    color: #ffffff;
+  }
+
+  .mini-sw {
+    position: relative;
+    width: 36px; height: 20px;
+    background: rgba(var(--panel-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all .2s ease;
+    flex-shrink: 0;
+  }
+  .mini-sw::before {
+    content: '';
+    position: absolute; top: 50%; left: 2px;
+    transform: translateY(-50%);
+    width: 14px; height: 14px;
+    background: var(--text-faint);
+    border-radius: 50%;
+    transition: all .2s ease;
+  }
+  .mini-sw.on {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .mini-sw.on::before {
+    left: calc(100% - 16px);
+    background: #ffffff;
+  }
+  .feature.on .mini-sw,
+  .feature.expanded .mini-sw {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--feature-on-element-border);
+  }
+  .feature.on .mini-sw::before,
+  .feature.expanded .mini-sw::before {
+    background: #a0a0a0;
+  }
+  .feature.on .mini-sw.on,
+  .feature.expanded .mini-sw.on {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .feature.on .mini-sw.on::before,
+  .feature.expanded .mini-sw.on::before {
+    background: #ffffff;
+  }
+
+  .feature-settings {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, background .2s;
+    background: rgba(var(--win-bg-rgb), 0.2);
+  }
+  .feature.expanded .feature-settings {
+    max-height: 800px;
+    border-top: 1px solid var(--border);
+  }
+  .feature.on .feature-settings,
+  .feature.expanded .feature-settings {
+    background: var(--feature-on-panel);
+    border-top-color: var(--feature-on-border);
+  }
+  .feature-settings-inner { padding: 10px 12px 12px; }
+
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.833rem;
+    color: var(--text-mid);
+    transition: color .15s;
+  }
+  .feature.on .setting-row,
+  .feature.expanded .setting-row {
+    color: var(--feature-on-text-mid);
+  }
+
+  .slider-row-cfg {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .slider-row-cfg:last-child { border-bottom: none; }
+  .feature.on .slider-row-cfg,
+  .feature.expanded .slider-row-cfg {
+    border-bottom-color: var(--feature-on-border);
+  }
+  .slider-row-cfg .slider-head {
+    display: flex; justify-content: space-between;
+    font-size: 0.833rem; color: var(--text-mid);
+    margin-bottom: 8px;
+    transition: color .15s;
+  }
+  .feature.on .slider-row-cfg .slider-head,
+  .feature.expanded .slider-row-cfg .slider-head {
+    color: var(--feature-on-text-mid);
+  }
+  .slider-row-cfg .slider-head .val {
+    color: var(--accent);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .feature.on .slider-row-cfg .slider-head .val,
+  .feature.expanded .slider-row-cfg .slider-head .val {
+    color: var(--accent-bright);
+  }
+
+  input[type=range] {
+    width: 100%; height: 4px;
+    -webkit-appearance: none;
+    background: rgba(var(--panel-bg-rgb), 0.7);
+    border-radius: 2px;
+    outline: none;
+    transition: background .2s;
+  }
+  .feature.on input[type=range],
+  .feature.expanded input[type=range] {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border: 2px solid var(--win-bg);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 1px 4px var(--shadow-strong);
+    transition: all .15s;
+  }
+  .feature.on input[type=range]::-webkit-slider-thumb,
+  .feature.expanded input[type=range]::-webkit-slider-thumb {
+    border-color: #1a1a1a;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    background: var(--accent-bright);
+    transform: scale(1.1);
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px;
+    background: var(--accent);
+    border: 2px solid var(--win-bg);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+
+  .keybind {
+    min-width: 66px;
+    padding: 5px 10px;
+    background: rgba(var(--input-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-mid);
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: 0.3px;
+  }
+  .feature.on .keybind,
+  .feature.expanded .keybind {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--feature-on-element-border);
+    color: var(--feature-on-text);
+  }
+  .keybind:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+  }
+  .feature.on .keybind:hover,
+  .feature.expanded .keybind:hover {
+    border-color: var(--accent);
+    color: var(--accent-bright);
+    background: rgba(var(--accent-rgb), 0.15);
+  }
+  .keybind.capturing {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.15);
+    animation: pulse 1s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.4); }
+    50% { box-shadow: 0 0 0 4px rgba(var(--accent-rgb), 0.1); }
+  }
+
+  .section-group {
+    font-size: 0.792rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    padding: 8px 4px 4px;
+    margin-top: 4px;
+  }
+  .section-group:first-child { margin-top: 0; }
+
+  .auction-header {
+    padding: 14px 16px;
+    background: rgba(var(--win-bg-rgb), 0.3);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    backdrop-filter: blur(4px);
+  }
+  .scan-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .scan-btn {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 16px;
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: #ffffff;
+    font-size: 0.875rem; font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+    font-family: inherit;
+  }
+  .scan-btn:hover {
+    background: var(--accent-bright);
+    border-color: var(--accent-bright);
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+  }
+  .scan-btn:active { transform: translateY(1px); }
+  .scan-btn.scanning {
+    background: var(--warn); border-color: var(--warn);
+    pointer-events: none;
+  }
+  .scan-btn svg {
+    width: 0.917rem; height: 0.917rem;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .scan-btn.scanning svg { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .scan-info {
+    flex: 1; display: flex; gap: 14px;
+    font-size: 0.833rem; color: var(--text-dim);
+  }
+  .scan-info .stat b {
+    color: var(--text); font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .scan-info .stat.hl b { color: var(--accent); }
+
+  .progress-bar {
+    height: 3px;
+    background: rgba(var(--panel-bg-rgb), 0.6);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .progress-bar .fill {
+    height: 100%; width: 0%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .3s;
+  }
+
+  .filters { display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .filter-input {
+    flex: 1; min-width: 100px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px;
+    background: rgba(var(--input-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    transition: border-color .15s, box-shadow .15s;
+    backdrop-filter: blur(4px);
+  }
+  .filter-input:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+  }
+  .filter-input svg {
+    width: 0.917rem; height: 0.917rem;
+    stroke: var(--text-dim); fill: none;
+    stroke-width: 2; stroke-linecap: round;
+    flex-shrink: 0;
+  }
+  .filter-input input {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-size: 0.875rem;
+    width: 100%; font-family: inherit;
+  }
+  .filter-input input::placeholder { color: var(--text-faint); }
+
+  .sort-select {
+    padding: 6px 24px 6px 10px;
+    background: rgba(var(--input-bg-rgb), 0.7) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 6px center;
+    background-size: 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-size: 0.875rem;
+    outline: none; cursor: pointer;
+    appearance: none; -webkit-appearance: none;
+    font-family: inherit;
+    transition: border-color .15s;
+    backdrop-filter: blur(4px);
+  }
+  .sort-select:hover, .sort-select:focus { border-color: var(--accent); }
+  .sort-select option { background: var(--win-bg); color: var(--text); }
+
+  .chk-small {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 10px;
+    background: rgba(var(--input-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    font-size: 0.833rem;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+    backdrop-filter: blur(4px);
+  }
+  .chk-small:hover { border-color: var(--accent); color: var(--text); }
+  .chk-small .box {
+    width: 13px; height: 13px;
+    border: 1.5px solid var(--text-faint);
+    border-radius: 3px;
+    background: rgba(var(--input-bg-rgb), 0.8);
+    position: relative; flex-shrink: 0;
+  }
+  .chk-small.on .box {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .chk-small.on .box::after {
+    content: '';
+    position: absolute;
+    left: 3px; top: 0;
+    width: 3px; height: 7px;
+    border: solid #ffffff;
+    border-width: 0 1.8px 1.8px 0;
+    transform: rotate(45deg);
+  }
+  .chk-small.on { color: var(--accent); border-color: var(--accent); }
+
+  .auction-grid-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 14px 16px;
+    min-height: 0;
+  }
+  .auction-grid-wrap::-webkit-scrollbar { width: 7px; }
+  .auction-grid-wrap::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 4px;
+  }
+
+  .auction-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .skel-card {
+    background: rgba(var(--panel-bg-rgb), 0.5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .skel-card .skel-img {
+    height: 56px;
+    background: linear-gradient(90deg,
+      rgba(var(--panel-bg-rgb), 0.3) 0%,
+      rgba(var(--sidebar-bg-rgb), 0.7) 50%,
+      rgba(var(--panel-bg-rgb), 0.3) 100%);
+    background-size: 200% 100%;
+    animation: skel-shimmer 1.4s linear infinite;
+  }
+  .skel-card .skel-body {
+    padding: 8px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .skel-card .skel-line {
+    height: 8px; border-radius: 4px;
+    background: linear-gradient(90deg,
+      rgba(var(--panel-bg-rgb), 0.3) 0%,
+      rgba(var(--sidebar-bg-rgb), 0.7) 50%,
+      rgba(var(--panel-bg-rgb), 0.3) 100%);
+    background-size: 200% 100%;
+    animation: skel-shimmer 1.4s linear infinite;
+  }
+  .skel-card .skel-line.short { width: 60%; }
+  @keyframes skel-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .empty-state {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100%;
+    color: var(--text-faint);
+    gap: 12px; text-align: center;
+    padding: 30px 16px;
+  }
+  .empty-state svg {
+    width: 44px; height: 44px;
+    stroke: var(--text-faint); fill: none;
+    stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    opacity: 0.5;
+  }
+  .empty-state .title {
+    color: var(--text-mid); font-weight: 600;
+    font-size: 0.958rem;
+  }
+  .empty-state .hint {
+    font-size: 0.833rem;
+    color: var(--text-faint);
+    max-width: 340px; line-height: 1.55;
+  }
+
+  .config-wrap, .appearance-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .config-wrap::-webkit-scrollbar,
+  .appearance-wrap::-webkit-scrollbar { width: 6px; }
+  .config-wrap::-webkit-scrollbar-thumb,
+  .appearance-wrap::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 3px;
+  }
+
+  .config-section, .section {
+    background: rgba(var(--panel-bg-rgb), 0.55);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    backdrop-filter: blur(6px);
+  }
+  .cfg-title, .section-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.792rem;
+    font-weight: 700;
+    color: var(--text-mid);
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .cfg-title svg, .section-title svg {
+    width: 0.958rem; height: 0.958rem;
+    stroke: var(--accent); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .cfg-title .count {
+    color: var(--text-faint);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 4px;
+    font-size: 0.833rem;
+  }
+
+  .save-row { display: flex; gap: 6px; align-items: center; }
+  .cfg-input {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(var(--input-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 0.875rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    backdrop-filter: blur(4px);
+  }
+  .cfg-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.1);
+  }
+  .cfg-input::placeholder { color: var(--text-faint); }
+
+  .btn {
+    padding: 8px 14px;
+    background: rgba(var(--input-bg-rgb), 0.7);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    color: var(--text-mid);
+    font-size: 0.833rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s ease;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-family: inherit;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+  .btn svg {
+    width: 0.875rem; height: 0.875rem;
+    stroke: currentColor; fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+  }
+  .btn.primary:hover {
+    background: var(--accent-bright);
+    border-color: var(--accent-bright);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.2);
+  }
+  .btn.danger:hover {
+    border-color: var(--bad);
+    color: var(--bad);
+    background: rgba(var(--bad-rgb), 0.05);
+  }
+
+  .cfg-list {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 200px; overflow-y: auto;
+  }
+  .cfg-list::-webkit-scrollbar { width: 4px; }
+  .cfg-list::-webkit-scrollbar-thumb {
+    background: var(--border-strong); border-radius: 2px;
+  }
+
+  .cfg-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: rgba(var(--input-bg-rgb), 0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .cfg-item:hover {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.03);
+  }
+  .cfg-item.active {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.08);
+    box-shadow: inset 3px 0 0 var(--accent);
+  }
+  .cfg-item .cfg-ico {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(var(--panel-bg-rgb), 0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+    transition: all .15s;
+  }
+  .cfg-item.active .cfg-ico {
+    background: var(--accent); border-color: var(--accent);
+  }
+  .cfg-item .cfg-ico svg {
+    width: 1rem; height: 1rem;
+    stroke: var(--text-mid); fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .cfg-item.active .cfg-ico svg { stroke: #ffffff; }
+  .cfg-item .cfg-meta { flex: 1; min-width: 0; }
+  .cfg-item .cfg-name {
+    font-size: 0.917rem;
+    color: var(--text);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cfg-item.active .cfg-name { color: var(--accent); font-weight: 600; }
+  .cfg-item .cfg-date {
+    font-size: 0.75rem;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+  .cfg-item .cfg-actions {
+    display: flex; gap: 4px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .cfg-item:hover .cfg-actions { opacity: 1; }
+  .cfg-item .cfg-act {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px;
+    background: rgba(var(--panel-bg-rgb), 0.6);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .cfg-item .cfg-act svg {
+    width: 0.833rem; height: 0.833rem;
+    stroke: var(--text-mid); fill: none;
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .cfg-item .cfg-act:hover {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.08);
+  }
+  .cfg-item .cfg-act:hover svg { stroke: var(--accent); }
+  .cfg-item .cfg-act.del:hover {
+    border-color: var(--bad);
+    background: rgba(var(--bad-rgb), 0.08);
+  }
+  .cfg-item .cfg-act.del:hover svg { stroke: var(--bad); }
+
+  .cfg-empty {
+    text-align: center;
+    color: var(--text-faint);
+    font-size: 0.833rem;
+    padding: 26px 10px;
+    font-style: italic;
+  }
+
+  .cfg-actions-row {
+    display: flex; gap: 6px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+
+  .cfg-toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    font-size: 0.875rem;
+    color: var(--text-mid);
+  }
+
+  .presets-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .preset-swatch {
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all .15s ease;
+  }
+  .preset-swatch:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+  .preset-swatch.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(var(--accent-rgb), 0.3);
+  }
+  .preset-swatch .swatch-bar {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .preset-swatch .swatch-name {
+    position: absolute;
+    bottom: 4px; left: 8px;
+    font-size: 0.667rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    max-width: calc(100% - 14px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preset-swatch.light .swatch-name {
+    color: #1a1a1a;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.9);
+  }
+  .preset-swatch .swatch-preview {
+    position: absolute;
+    top: 6px; right: 6px;
+    display: flex; gap: 3px;
+  }
+  .preset-swatch .swatch-preview span {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+  .preset-swatch .swatch-del {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 16px; height: 16px;
+    display: none;
+    align-items: center; justify-content: center;
+    background: var(--bad);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.917rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
+    font-weight: 700;
+  }
+  .preset-swatch.custom:hover .swatch-del { display: flex; }
+
+  .color-row-cfg {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .color-row-cfg:last-child { border-bottom: none; }
+  .color-row-cfg label {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--text-mid);
+  }
+  .color-swatch-input {
+    width: 40px; height: 26px;
+    border-radius: 5px;
+    border: 1px solid var(--border-strong);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    background-image:
+      linear-gradient(45deg, #ccc 25%, transparent 25%),
+      linear-gradient(-45deg, #ccc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ccc 75%),
+      linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 8px 8px;
+    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  }
+  .color-swatch-input:hover { border-color: var(--accent); }
+  .color-swatch-input .fill {
+    position: absolute; inset: 0;
+    border-radius: 4px;
+  }
+  .color-swatch-input input[type=color] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%; border: none; padding: 0;
+  }
+  .color-hex-view {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.792rem;
+    color: var(--text-mid);
+    background: rgba(var(--input-bg-rgb), 0.6);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 5px 8px;
+    min-width: 78px;
+    text-align: center;
+    letter-spacing: 0.3px;
+    font-weight: 500;
+  }
+
+  .btn-row { display: flex; gap: 8px; padding-top: 4px; }
+
+  .placeholder {
+    display: flex; align-items: center; justify-content: center;
+    height: 100%;
+    color: var(--text-faint);
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+
+  .toast {
+    position: absolute;
+    bottom: 32px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    padding: 10px 18px;
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: var(--radius);
+    box-shadow:
+      0 8px 24px var(--shadow-strong),
+      0 2px 8px var(--shadow);
+    opacity: 0;
+    transition: all .25s ease;
+    pointer-events: none;
+    z-index: 100;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast svg {
+    width: 0.958rem; height: 0.958rem;
+    stroke: currentColor; fill: none;
+    stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .toast.err { background: var(--bad); }
+
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 200;
+    display: none;
+    align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+    border-radius: var(--radius-lg);
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: rgba(var(--win-bg-rgb), 0.95);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    min-width: 260px;
+    box-shadow: 0 16px 48px var(--shadow-strong);
+    backdrop-filter: blur(20px) saturate(1.3);
+  }
+  .modal .modal-title {
+    font-size: 1rem; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .modal .modal-text {
+    font-size: 0.875rem; color: var(--text-mid);
+    margin-bottom: 18px; line-height: 1.5;
+  }
+  .modal .modal-btns {
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+</style>
+</head>
+<body>
+
+<div class="menu" id="menu">
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="titlebar" id="titlebar">
+    <h1>
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2 L20 5.5 L20 12 Q20 18.5 12 22 Q4 18.5 4 12 L4 5.5 Z"/>
+          <polyline points="8.5 7.5 12 14.5 15.5 7.5"/>
+        </svg>
+      </span>
+      <span class="title-text">
+        <span class="title-main">VV.EXE</span>
+        <span class="title-sub">Stalzone Cheat</span>
+      </span>
+    </h1>
+    <div class="controls">
+      <div class="min" id="minBtn">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div class="close" id="closeBtn">
+        <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="sidebar">
+      <div class="tab-btn active" data-tab="combat">
+        <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="3" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="3" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg></span>
+        Combat
+      </div>
+      <div class="tab-btn" data-tab="visual">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+        Visual
+      </div>
+      <div class="tab-btn" data-tab="players">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        Players
+      </div>
+      <div class="tab-btn" data-tab="auction">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        Auction
+        <span class="badge" id="auctionBadge" style="display:none;">0</span>
+      </div>
+      <div class="tab-btn" data-tab="world">
+        <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+        World
+      </div>
+      <div class="tab-btn" data-tab="misc">
+        <span class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+        Misc
+      </div>
+      <div class="tab-btn" data-tab="config">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></span>
+        Config
+      </div>
+
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-sep"></div>
+
+      <div class="tab-btn" data-tab="appearance">
+        <span class="ico"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 3 3 0 0 0 3-3 3 3 0 0 1 3-3h1a3 3 0 0 0 3-3 9 9 0 0 0-10-9z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7.5" r="1"/><circle cx="16.5" cy="10.5" r="1"/></svg></span>
+        Theme
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="tab-panel active" data-panel="combat">
+        <div class="features-wrap">
+          <div class="section-group">Прицеливание</div>
+
+          <div class="feature" data-feature="aimbot">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Aimbot</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row">
+                  <span>Кнопка активации</span>
+                  <div class="keybind" data-key="MOUSE5" onclick="startCapture(this)">MOUSE5</div>
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>FOV</span><span class="val" data-val>15°</span></div>
+                  <input type="range" min="1" max="180" value="15" oninput="updateSlider(this)">
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Smooth</span><span class="val" data-val>5.0</span></div>
+                  <input type="range" min="1" max="30" value="5" oninput="updateSlider(this, v => (v/10).toFixed(1))">
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Дистанция</span><span class="val" data-val>250 м</span></div>
+                  <input type="range" min="10" max="1000" value="250" oninput="updateSlider(this, v => v + ' м')">
+                </div>
+                <div class="setting-row"><span>Целиться в голову</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Visible check</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Игнорировать свою команду</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature" data-feature="silent">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Silent Aim</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>FOV</span><span class="val" data-val>25°</span></div>
+                  <input type="range" min="1" max="180" value="25" oninput="updateSlider(this)">
+                </div>
+                <div class="setting-row"><span>Показывать hitbox</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Auto fire</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature" data-feature="trigger">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Triggerbot</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Задержка (мс)</span><span class="val" data-val>50</span></div>
+                  <input type="range" min="1" max="500" value="50" oninput="updateSlider(this)">
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Дистанция</span><span class="val" data-val>100 м</span></div>
+                  <input type="range" min="10" max="500" value="100" oninput="updateSlider(this, v => v + ' м')">
+                </div>
+                <div class="setting-row"><span>Только в прицеле</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Оружие</div>
+
+          <div class="feature" data-feature="recoil">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">No Recoil</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Сила компенсации</span><span class="val" data-val>72%</span></div>
+                  <input type="range" min="0" max="100" value="72" oninput="updateSlider(this, v => v + '%')">
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Рандомизация</span><span class="val" data-val>8%</span></div>
+                  <input type="range" min="0" max="30" value="8" oninput="updateSlider(this, v => v + '%')">
+                </div>
+                <div class="setting-row"><span>Только вертикаль</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature" data-feature="spread">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">No Spread</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Только при прицеливании</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Индикаторы</div>
+
+          <div class="feature" data-feature="fovcircle">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">FOV Circle</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Радиус</span><span class="val" data-val>150</span></div>
+                  <input type="range" min="10" max="500" value="150" oninput="updateSlider(this)">
+                </div>
+                <div class="setting-row"><span>Показывать прицел</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Показывать FOV</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="visual">
+        <div class="features-wrap">
+          <div class="section-group">Игроки</div>
+          <div class="feature" data-feature="esp">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Player ESP</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Боксы</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Здоровье</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Ники</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Скелет</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Проверка команды</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Дистанция</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Оружие в руках</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>BOT / PLAYER</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>WIN / FALSE</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Макс. дистанция</span><span class="val" data-val>300 м</span></div>
+                  <input type="range" min="10" max="1000" value="300" oninput="updateSlider(this, v => v + ' м')">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="feature" data-feature="chams">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Chams</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Сквозь стены</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Подсветка цвета команды</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Мир</div>
+          <div class="feature" data-feature="skybox">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Custom Skybox</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Звёзды</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Aurora</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="feature" data-feature="loot">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Loot ESP</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Оружие</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Патроны</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Медикаменты</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Артефакты</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Контейнеры</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Редкость цветом</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="feature" data-feature="corpse">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Corpse ESP</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Череп на трупе</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Показывать лут</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Показывать имя</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Интерфейс</div>
+          <div class="feature" data-feature="clock">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Clock</div>
+              <div class="feature-status on" data-status>вкл</div>
+              <div class="mini-sw on" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Радужный</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Показывать дату</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Показывать FPS</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>24-часовой формат</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Прозрачность</span><span class="val" data-val>80%</span></div>
+                  <input type="range" min="10" max="100" value="80" oninput="updateSlider(this, v => v + '%')">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="players">
+        <div class="features-wrap">
+          <div class="section-group">Сравнение</div>
+          <div class="feature" data-feature="comparison">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Player Comparison</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>WIN / FALSE индикатор</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Разница мощи</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Иконки снаряжения</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>BOT / PLAYER</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Оружие в руках</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Отслеживание</div>
+          <div class="feature" data-feature="radar">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Radar</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Радиус</span><span class="val" data-val>150 м</span></div>
+                  <input type="range" min="50" max="500" value="150" oninput="updateSlider(this, v => v + ' м')">
+                </div>
+                <div class="setting-row"><span>Показывать ники</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="auction">
+        <div class="auction-header">
+          <div class="scan-bar">
+            <button class="scan-btn" id="scanBtn" onclick="startScan()">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span id="scanBtnText">Сканировать</span>
+            </button>
+            <div class="scan-info">
+              <div class="stat">Лотов: <b id="statTotal">0</b></div>
+              <div class="stat hl">Выгодных: <b id="statDeals">0</b></div>
+              <div class="stat">Скан: <b id="statTime">—</b></div>
+            </div>
+          </div>
+          <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+
+          <div class="filters">
+            <div class="filter-input">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="searchInput" placeholder="Поиск..." oninput="renderLots()">
+            </div>
+            <select class="sort-select" id="sortSelect" onchange="renderLots()">
+              <option value="price-asc">Цена ↑</option>
+              <option value="price-desc">Цена ↓</option>
+              <option value="qty-desc">Кол-во ↓</option>
+              <option value="deal">Скидка</option>
+            </select>
+            <div class="chk-small on" onclick="toggleChk(this)"><div class="box"></div>Выгодные</div>
+          </div>
+        </div>
+
+        <div class="auction-grid-wrap">
+          <div class="auction-grid" id="auctionGrid"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="world">
+        <div class="features-wrap">
+          <div class="section-group">Объекты мира</div>
+          <div class="feature" data-feature="items">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Item ESP</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Оружие</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Боеприпасы</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Медикаменты</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+                <div class="setting-row"><span>Артефакты</span><div class="mini-sw" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="feature" data-feature="stash">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Stash ESP</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row"><span>Показывать дистанцию</span><div class="mini-sw on" onclick="toggleMini(this)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="misc">
+        <div class="features-wrap">
+          <div class="section-group">Движение</div>
+          <div class="feature" data-feature="bhop">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Bunny Hop</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Chance</span><span class="val" data-val>100%</span></div>
+                  <input type="range" min="1" max="100" value="100" oninput="updateSlider(this, v => v + '%')">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-group">Интерфейс</div>
+          <div class="feature" data-feature="panickey">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Panic Key</div>
+              <div class="feature-status on" data-status>END</div>
+              <div class="mini-sw on" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row">
+                  <span>Клавиша выгрузки</span>
+                  <div class="keybind" data-key="END" onclick="startCapture(this)">END</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="feature" data-feature="quickauc">
+            <div class="feature-head">
+              <div class="feature-gear" onclick="event.stopPropagation(); toggleGear(this)">
+                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+              <div class="feature-name">Quick Auction</div>
+              <div class="feature-status" data-status>выкл</div>
+              <div class="mini-sw" onclick="toggleFeature(this)"></div>
+            </div>
+            <div class="feature-settings">
+              <div class="feature-settings-inner">
+                <div class="setting-row">
+                  <span>Клавиша открытия</span>
+                  <div class="keybind" data-key="F5" onclick="startCapture(this)">F5</div>
+                </div>
+                <div class="setting-row">
+                  <span>Клавиша закрытия</span>
+                  <div class="keybind" data-key="ESC" onclick="startCapture(this)">ESC</div>
+                </div>
+                <div class="slider-row-cfg">
+                  <div class="slider-head"><span>Задержка (мс)</span><span class="val" data-val>120</span></div>
+                  <input type="range" min="0" max="1000" value="120" oninput="updateSlider(this)">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="config">
+        <div class="config-wrap">
+          <div class="config-section">
+            <div class="cfg-title">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Сохранить конфиг
+            </div>
+            <div class="save-row">
+              <input type="text" class="cfg-input" id="cfgNameInput" placeholder="Название конфига..." maxlength="32">
+              <button class="btn primary" onclick="saveConfig()">
+                <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+                Создать
+              </button>
+            </div>
+            <div class="cfg-actions-row">
+              <button class="btn" onclick="overwriteConfig()">
+                <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Перезаписать
+              </button>
+              <button class="btn" onclick="exportConfig()">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Экспорт
+              </button>
+              <button class="btn" onclick="importConfig()">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Импорт
+              </button>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <div class="cfg-title">
+              <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Мои конфиги <span class="count" id="cfgCount">(0)</span>
+            </div>
+            <div class="cfg-list" id="cfgList"></div>
+          </div>
+
+          <div class="config-section">
+            <div class="cfg-title">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Автозагрузка
+            </div>
+            <div class="cfg-toggle-row"><span>Загружать при старте</span><div class="mini-sw on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="cfg-toggle-row"><span>Автосохранение при выходе</span><div class="mini-sw on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="cfg-toggle-row"><span>Уведомлять о загрузке</span><div class="mini-sw" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="appearance">
+        <div class="appearance-wrap">
+          <div class="section">
+            <div class="section-title">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Темы
+            </div>
+            <div class="presets-grid" id="presetsGrid"></div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+              Цвета темы
+            </div>
+            <div class="color-row-cfg">
+              <label>Акцент</label>
+              <div class="color-swatch-input"><div class="fill" id="fillAccent"></div>
+                <input type="color" id="pickAccent" value="#475569" oninput="applyCustomAccent(this.value)"></div>
+              <div class="color-hex-view" id="hexAccent">#475569</div>
+            </div>
+            <div class="color-row-cfg">
+              <label>Фон окна</label>
+              <div class="color-swatch-input"><div class="fill" id="fillWinBg"></div>
+                <input type="color" id="pickWinBg" value="#ffffff" oninput="applyCustomColor('winBg', this.value)"></div>
+              <div class="color-hex-view" id="hexWinBg">#FFFFFF</div>
+            </div>
+            <div class="color-row-cfg">
+              <label>Сайдбар</label>
+              <div class="color-swatch-input"><div class="fill" id="fillSidebar"></div>
+                <input type="color" id="pickSidebar" value="#fafafa" oninput="applyCustomColor('sidebar', this.value)"></div>
+              <div class="color-hex-view" id="hexSidebar">#FAFAFA</div>
+            </div>
+            <div class="color-row-cfg">
+              <label>Панели</label>
+              <div class="color-swatch-input"><div class="fill" id="fillPanel"></div>
+                <input type="color" id="pickPanel" value="#f4f4f5" oninput="applyCustomColor('panel', this.value)"></div>
+              <div class="color-hex-view" id="hexPanel">#F4F4F5</div>
+            </div>
+            <div class="color-row-cfg">
+              <label>Текст</label>
+              <div class="color-swatch-input"><div class="fill" id="fillText"></div>
+                <input type="color" id="pickText" value="#18181b" oninput="applyCustomColor('text', this.value)"></div>
+              <div class="color-hex-view" id="hexText">#18181B</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="10" r="1.5"/><circle cx="10" cy="16" r="2.5"/><circle cx="18" cy="18" r="1"/></svg>
+              Фон
+            </div>
+            <div class="cfg-toggle-row"><span>Частицы</span><div class="mini-sw on" id="swParticles" onclick="toggleParticles(this)"></div></div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Количество</span><span class="val" id="valParticlesCount">40</span></div>
+              <input type="range" id="sliderParticlesCount" min="10" max="150" value="40" oninput="applyParticlesCount(this.value)">
+            </div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Скорость</span><span class="val" id="valParticlesSpeed">1.0×</span></div>
+              <input type="range" id="sliderParticlesSpeed" min="1" max="30" value="10" oninput="applyParticlesSpeed(this.value)">
+            </div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Связи</span><span class="val" id="valParticlesLinks">120 px</span></div>
+              <input type="range" id="sliderParticlesLinks" min="0" max="250" value="120" oninput="applyParticlesLinks(this.value)">
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+              Сохранить как тему
+            </div>
+            <div class="save-row">
+              <input type="text" class="cfg-input" id="newThemeName" placeholder="Название темы..." maxlength="16">
+              <button class="btn primary" onclick="createCustomTheme()">
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Создать
+              </button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">
+              <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><line x1="4" y1="12" x2="20" y2="12"/></svg>
+              Геометрия
+            </div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Прозрачность окна</span><span class="val" id="valOpacity">94%</span></div>
+              <input type="range" id="sliderOpacity" min="40" max="100" value="94" oninput="applyOpacity(this.value)">
+            </div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Скругление углов</span><span class="val" id="valRadius">8 px</span></div>
+              <input type="range" id="sliderRadius" min="0" max="24" value="8" oninput="applyRadius(this.value)">
+            </div>
+            <div class="slider-row-cfg">
+              <div class="slider-head"><span>Размер UI</span><span class="val" id="valFont">100%</span></div>
+              <input type="range" id="sliderFont" min="75" max="150" value="100" oninput="applyFont(this.value)">
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="btn-row">
+              <button class="btn" onclick="resetTheme()">
+                <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                Сбросить тему
+              </button>
+              <button class="btn" onclick="resetGeometry()">
+                <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                Сбросить геометрию
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastText">Готово</span>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Подтверждение</div>
+    <div class="modal-text" id="modalText">Вы уверены?</div>
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">Отмена</button>
+      <button class="btn danger" id="modalConfirm">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ============================================================
+     ЧАСТИЦЫ ВНУТРИ ОКНА
+     ============================================================ */
+  const menuEl = document.getElementById('menu');
+  const particlesCanvas = document.getElementById('particles-canvas');
+  const pCtx = particlesCanvas.getContext('2d');
+
+  let particlesEnabled = true;
+  let particlesCount = 40;
+  let particlesSpeed = 1.0;
+  let particlesLinks = 120;
+  let particles = [];
+  let mouse = { x: -9999, y: -9999 };
+  let canvasW = 0, canvasH = 0;
+
+  function resizeCanvas() {
+    const rect = menuEl.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    canvasW = rect.width; canvasH = rect.height;
+    particlesCanvas.width  = Math.max(1, Math.floor(canvasW * dpr));
+    particlesCanvas.height = Math.max(1, Math.floor(canvasH * dpr));
+    particlesCanvas.style.width  = canvasW + 'px';
+    particlesCanvas.style.height = canvasH + 'px';
+    pCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  function getAccentColor() {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue('--accent-rgb').trim() || '71, 85, 105';
+  }
+
+  function initParticles() {
+    particles = [];
+    for (let i = 0; i < particlesCount; i++) {
+      particles.push({
+        x: Math.random() * canvasW,
+        y: Math.random() * canvasH,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        r: 0.8 + Math.random() * 1.6
+      });
+    }
+  }
+
+  function drawParticles() {
+    pCtx.clearRect(0, 0, canvasW, canvasH);
+    if (!particlesEnabled) {
+      requestAnimationFrame(drawParticles);
+      return;
+    }
+
+    const accentRgb = getAccentColor();
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx * particlesSpeed;
+      p.y += p.vy * particlesSpeed;
+
+      if (p.x < 0 || p.x > canvasW) p.vx *= -1;
+      if (p.y < 0 || p.y > canvasH) p.vy *= -1;
+      p.x = Math.max(0, Math.min(canvasW, p.x));
+      p.y = Math.max(0, Math.min(canvasH, p.y));
+
+      const dx = mouse.x - p.x, dy = mouse.y - p.y;
+      const distMouse = Math.sqrt(dx*dx + dy*dy);
+      if (distMouse < 140 && distMouse > 0.1) {
+        const force = (140 - distMouse) / 140 * 0.02;
+        p.vx += (dx / distMouse) * force;
+        p.vy += (dy / distMouse) * force;
+      }
+
+      const sp = Math.sqrt(p.vx*p.vx + p.vy*p.vy);
+      if (sp > 1.2) {
+        p.vx = (p.vx / sp) * 1.2;
+        p.vy = (p.vy / sp) * 1.2;
+      }
+
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      pCtx.fillStyle = `rgba(${accentRgb}, 0.6)`;
+      pCtx.fill();
+    }
+
+    if (particlesLinks > 0) {
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const a = particles[i], b = particles[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < particlesLinks) {
+            const alpha = (1 - dist / particlesLinks) * 0.24;
+            pCtx.beginPath();
+            pCtx.moveTo(a.x, a.y);
+            pCtx.lineTo(b.x, b.y);
+            pCtx.strokeStyle = `rgba(${accentRgb}, ${alpha})`;
+            pCtx.lineWidth = 0.7;
+            pCtx.stroke();
+          }
+        }
+      }
+    }
+
+    requestAnimationFrame(drawParticles);
+  }
+
+  menuEl.addEventListener('mousemove', e => {
+    const rect = menuEl.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  menuEl.addEventListener('mouseleave', () => {
+    mouse.x = -9999;
+    mouse.y = -9999;
+  });
+
+  new ResizeObserver(() => {
+    resizeCanvas();
+    initParticles();
+  }).observe(menuEl);
+
+  function toggleParticles(el) {
+    el.classList.toggle('on');
+    particlesEnabled = el.classList.contains('on');
+    particlesCanvas.classList.toggle('hidden', !particlesEnabled);
+    showToast(particlesEnabled ? 'Частицы включены' : 'Частицы выключены', false);
+  }
+  function applyParticlesCount(val) {
+    particlesCount = parseInt(val);
+    document.getElementById('valParticlesCount').textContent = particlesCount;
+    initParticles();
+  }
+  function applyParticlesSpeed(val) {
+    particlesSpeed = parseInt(val) / 10;
+    document.getElementById('valParticlesSpeed').textContent = particlesSpeed.toFixed(1) + '×';
+  }
+  function applyParticlesLinks(val) {
+    particlesLinks = parseInt(val);
+    document.getElementById('valParticlesLinks').textContent = particlesLinks + ' px';
+  }
+
+  /* ============================================================
+     ВКЛАДКИ
+     ============================================================ */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelector(`.tab-panel[data-panel="${btn.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  /* ============================================================
+     FEATURE
+     ============================================================ */
+  function toggleGear(el) {
+    el.closest('.feature').classList.toggle('expanded');
+  }
+
+  function toggleFeature(el) {
+    el.classList.toggle('on');
+    const feat = el.closest('.feature');
+    const status = feat.querySelector('[data-status]');
+    const isOn = el.classList.contains('on');
+
+    feat.classList.toggle('on', isOn);
+
+    if (isOn) {
+      if (feat.dataset.feature === 'panickey') {
+        status.textContent = 'END';
+      } else {
+        status.textContent = 'вкл';
+      }
+      status.classList.add('on');
+    } else {
+      status.textContent = 'выкл';
+      status.classList.remove('on');
+    }
+  }
+
+  function toggleMini(el) {
+    el.classList.toggle('on');
+  }
+
+  function updateSlider(input, fmt) {
+    const row = input.closest('.slider-row-cfg');
+    const valEl = row.querySelector('[data-val]');
+    if (fmt) {
+      valEl.textContent = fmt(parseFloat(input.value));
+    } else {
+      valEl.textContent = input.value;
+    }
+  }
+
+  /* ============================================================
+     KEYBIND CAPTURE
+     ============================================================ */
+  let capturingEl = null;
+  const KEY_NAMES = {
+    'Escape': 'ESC', 'Backspace': 'BKSP', 'Enter': 'ENTER', 'Tab': 'TAB',
+    'Space': 'SPACE', 'ShiftLeft': 'LSHIFT', 'ShiftRight': 'RSHIFT',
+    'ControlLeft': 'LCTRL', 'ControlRight': 'RCTRL', 'AltLeft': 'LALT', 'AltRight': 'RALT',
+    'CapsLock': 'CAPS', 'Insert': 'INS', 'Delete': 'DEL', 'Home': 'HOME',
+    'End': 'END', 'PageUp': 'PGUP', 'PageDown': 'PGDN',
+    'ArrowUp': 'UP', 'ArrowDown': 'DOWN', 'ArrowLeft': 'LEFT', 'ArrowRight': 'RIGHT'
+  };
+
+  function codeToKeyName(code) {
+    if (code.startsWith('Key')) return code.slice(3);
+    if (code.startsWith('Digit')) return code.slice(5);
+    if (code.startsWith('Numpad')) return 'NUM' + code.slice(6);
+    if (/^F\d+$/.test(code)) return code;
+    if (KEY_NAMES[code]) return KEY_NAMES[code];
+    return code.toUpperCase();
+  }
+
+  function startCapture(el) {
+    if (capturingEl && capturingEl !== el) {
+      capturingEl.classList.remove('capturing');
+      capturingEl.textContent = capturingEl.dataset.key || '—';
+    }
+    capturingEl = el;
+    el.classList.add('capturing');
+    el.textContent = '...';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (capturingEl) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.code === 'Escape') {
+        capturingEl.classList.remove('capturing');
+        capturingEl.textContent = capturingEl.dataset.key || '—';
+        capturingEl = null;
+        return;
+      }
+      if (e.code === 'Backspace') {
+        capturingEl.classList.remove('capturing');
+        capturingEl.dataset.key = '';
+        capturingEl.textContent = '—';
+        capturingEl = null;
+        return;
+      }
+      const name = codeToKeyName(e.code);
+      capturingEl.dataset.key = name;
+      capturingEl.textContent = name;
+      capturingEl.classList.remove('capturing');
+      capturingEl = null;
+      return;
+    }
+  });
+
+  /* ============================================================
+     CONFIG
+     ============================================================ */
+  let configs = [];
+  let nextCfgId = 1;
+
+  function renderConfigs() {
+    const list = document.getElementById('cfgList');
+    document.getElementById('cfgCount').textContent = `(${configs.length})`;
+    if (configs.length === 0) {
+      list.innerHTML = `<div class="cfg-empty">Нет сохранённых конфигов</div>`;
+      return;
+    }
+    list.innerHTML = configs.map(cfg => `
+      <div class="cfg-item ${cfg.active ? 'active' : ''}" onclick="loadConfig(${cfg.id})">
+        <div class="cfg-ico">
+          <svg viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+          </svg>
+        </div>
+        <div class="cfg-meta">
+          <div class="cfg-name">${escapeHtml(cfg.name)}</div>
+          <div class="cfg-date">${cfg.date}${cfg.active ? ' · активен' : ''}</div>
+        </div>
+        <div class="cfg-actions">
+          <div class="cfg-act" onclick="event.stopPropagation(); renameConfig(${cfg.id})" title="Переименовать">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="cfg-act" onclick="event.stopPropagation(); duplicateConfig(${cfg.id})" title="Дублировать">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
+          <div class="cfg-act del" onclick="event.stopPropagation(); askDeleteConfig(${cfg.id})" title="Удалить">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[c]);
+  }
+
+  function fmtDate(d) {
+    return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function saveConfig() {
+    const inp = document.getElementById('cfgNameInput');
+    const name = inp.value.trim();
+    if (!name) { showToast('Введи название', true); inp.focus(); return; }
+    if (configs.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Такое имя уже есть', true); return;
+    }
+    configs.forEach(c => c.active = false);
+    configs.unshift({ id: nextCfgId++, name, date: fmtDate(new Date()), active: true });
+    inp.value = '';
+    renderConfigs();
+    showToast(`Конфиг "${name}" создан`, false);
+  }
+
+  function loadConfig(id) {
+    const cfg = configs.find(c => c.id === id);
+    if (!cfg) return;
+    configs.forEach(c => c.active = false);
+    cfg.active = true;
+    renderConfigs();
+    showToast(`Загружен: ${cfg.name}`, false);
+  }
+
+  function renameConfig(id) {
+    const cfg = configs.find(c => c.id === id);
+    if (!cfg) return;
+    const newName = prompt('Новое название:', cfg.name);
+    if (newName === null) return;
+    const t = newName.trim();
+    if (!t) { showToast('Пустое имя', true); return; }
+    if (configs.some(c => c.id !== id && c.name.toLowerCase() === t.toLowerCase())) {
+      showToast('Такое имя уже есть', true); return;
+    }
+    cfg.name = t;
+    renderConfigs();
+    showToast('Переименовано', false);
+  }
+
+  function duplicateConfig(id) {
+    const cfg = configs.find(c => c.id === id);
+    if (!cfg) return;
+    let base = cfg.name + ' Copy', name = base, n = 2;
+    while (configs.some(c => c.name === name)) name = base + ' ' + n++;
+    configs.push({ id: nextCfgId++, name, date: fmtDate(new Date()), active: false });
+    renderConfigs();
+    showToast(`Создана копия: ${name}`, false);
+  }
+
+  let deleteTargetId = null;
+  function askDeleteConfig(id) {
+    const cfg = configs.find(c => c.id === id);
+    if (!cfg) return;
+    deleteTargetId = id;
+    document.getElementById('modalTitle').textContent = 'Удалить конфиг?';
+    document.getElementById('modalText').textContent = `Конфиг "${cfg.name}" будет удалён без возможности восстановления.`;
+    document.getElementById('modalOverlay').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    deleteTargetId = null;
+  }
+
+  document.getElementById('modalConfirm').addEventListener('click', () => {
+    if (deleteTargetId !== null) {
+      const cfg = configs.find(c => c.id === deleteTargetId);
+      configs = configs.filter(c => c.id !== deleteTargetId);
+      renderConfigs();
+      showToast(`Удалён: ${cfg ? cfg.name : ''}`, false);
+    }
+    closeModal();
+  });
+
+  function overwriteConfig() {
+    const active = configs.find(c => c.active);
+    if (!active) { showToast('Нет активного конфига', true); return; }
+    active.date = fmtDate(new Date());
+    renderConfigs();
+    showToast(`Перезаписан: ${active.name}`, false);
+  }
+
+  function exportConfig() {
+    const data = {
+      version: 1,
+      configs,
+      theme: currentTheme,
+      customThemes,
+      particles: {
+        enabled: particlesEnabled,
+        count: particlesCount,
+        speed: particlesSpeed,
+        links: particlesLinks
+      }
+    };
+    console.log('[CONFIG EXPORT]\n' + JSON.stringify(data, null, 2));
+    showToast('Экспорт в консоль (F12)', false);
+  }
+
+  function importConfig() {
+    showToast('Импорт из файла — не реализовано', true);
+  }
+
+  /* ============================================================
+     ТЕМЫ
+     ============================================================ */
+  const PRESETS = {
+    white: {
+      light: true,
+      accent: '#475569', accentBright: '#64748b', accentDark: '#1e293b',
+      winBg: '#ffffff', sidebarBg: '#fafafa', panelBg: '#f4f4f5', inputBg: '#ffffff',
+      border: 'rgba(0,0,0,0.08)', borderStrong: 'rgba(0,0,0,0.14)',
+      text: '#18181b', textBright: '#000000', textMid: '#52525b', textDim: '#71717a', textFaint: '#a1a1aa',
+      shadow: 'rgba(0,0,0,0.06)', shadowStrong: 'rgba(0,0,0,0.15)'
+    },
+    gray: {
+      light: true,
+      accent: '#3f3f46', accentBright: '#52525b', accentDark: '#18181b',
+      winBg: '#f5f5f5', sidebarBg: '#ebebeb', panelBg: '#e4e4e7', inputBg: '#ffffff',
+      border: 'rgba(0,0,0,0.1)', borderStrong: 'rgba(0,0,0,0.18)',
+      text: '#18181b', textBright: '#000000', textMid: '#52525b', textDim: '#71717a', textFaint: '#a1a1aa',
+      shadow: 'rgba(0,0,0,0.08)', shadowStrong: 'rgba(0,0,0,0.18)'
+    },
+    sky: {
+      light: true,
+      accent: '#0284c7', accentBright: '#0ea5e9', accentDark: '#075985',
+      winBg: '#ffffff', sidebarBg: '#f0f9ff', panelBg: '#e0f2fe', inputBg: '#ffffff',
+      border: 'rgba(2,132,199,0.12)', borderStrong: 'rgba(2,132,199,0.25)',
+      text: '#0c4a6e', textBright: '#082f49', textMid: '#075985', textDim: '#0369a1', textFaint: '#7dd3fc',
+      shadow: 'rgba(2,132,199,0.1)', shadowStrong: 'rgba(2,132,199,0.2)'
+    },
+    mint: {
+      light: true,
+      accent: '#059669', accentBright: '#10b981', accentDark: '#064e3b',
+      winBg: '#ffffff', sidebarBg: '#f0fdf4', panelBg: '#dcfce7', inputBg: '#ffffff',
+      border: 'rgba(5,150,105,0.12)', borderStrong: 'rgba(5,150,105,0.25)',
+      text: '#064e3b', textBright: '#022c22', textMid: '#065f46', textDim: '#047857', textFaint: '#6ee7b7',
+      shadow: 'rgba(5,150,105,0.1)', shadowStrong: 'rgba(5,150,105,0.2)'
+    },
+    rose: {
+      light: true,
+      accent: '#e11d48', accentBright: '#f43f5e', accentDark: '#881337',
+      winBg: '#ffffff', sidebarBg: '#fff1f2', panelBg: '#ffe4e6', inputBg: '#ffffff',
+      border: 'rgba(225,29,72,0.12)', borderStrong: 'rgba(225,29,72,0.25)',
+      text: '#881337', textBright: '#4c0519', textMid: '#9f1239', textDim: '#be123c', textFaint: '#fda4af',
+      shadow: 'rgba(225,29,72,0.1)', shadowStrong: 'rgba(225,29,72,0.2)'
+    },
+    dark: {
+      light: false,
+      accent: '#60a5fa', accentBright: '#93c5fd', accentDark: '#3b82f6',
+      winBg: '#0f172a', sidebarBg: '#0a0f1e', panelBg: '#1e293b', inputBg: '#1e293b',
+      border: 'rgba(96,165,250,0.15)', borderStrong: 'rgba(96,165,250,0.3)',
+      text: '#e2e8f0', textBright: '#f8fafc', textMid: '#cbd5e1', textDim: '#94a3b8', textFaint: '#64748b',
+      shadow: 'rgba(0,0,0,0.4)', shadowStrong: 'rgba(0,0,0,0.6)'
+    },
+    graphite: {
+      light: false,
+      accent: '#a3a3a3', accentBright: '#d4d4d4', accentDark: '#525252',
+      winBg: '#171717', sidebarBg: '#0a0a0a', panelBg: '#262626', inputBg: '#262626',
+      border: 'rgba(255,255,255,0.08)', borderStrong: 'rgba(255,255,255,0.15)',
+      text: '#e5e5e5', textBright: '#ffffff', textMid: '#d4d4d4', textDim: '#a3a3a3', textFaint: '#737373',
+      shadow: 'rgba(0,0,0,0.5)', shadowStrong: 'rgba(0,0,0,0.7)'
+    },
+    midnight: {
+      light: false,
+      accent: '#8b5cf6', accentBright: '#a78bfa', accentDark: '#6d28d9',
+      winBg: '#0c0a1f', sidebarBg: '#070518', panelBg: '#1a1636', inputBg: '#1a1636',
+      border: 'rgba(139,92,246,0.18)', borderStrong: 'rgba(139,92,246,0.35)',
+      text: '#e9e4ff', textBright: '#ffffff', textMid: '#c4b5fd', textDim: '#a78bfa', textFaint: '#7c3aed',
+      shadow: 'rgba(0,0,0,0.5)', shadowStrong: 'rgba(0,0,0,0.7)'
+    }
+  };
+
+  let customThemes = [];
+  let currentTheme = { ...PRESETS.white };
+  let currentThemeKey = 'white';
+
+  function renderPresets() {
+    const grid = document.getElementById('presetsGrid');
+    grid.innerHTML = '';
+    Object.entries(PRESETS).forEach(([key, theme]) => {
+      grid.appendChild(makeSwatch(key, theme, false, key));
+    });
+    customThemes.forEach(ct => {
+      grid.appendChild(makeSwatch(ct.name, ct.colors, true, ct.id));
+    });
+    grid.querySelectorAll('.preset-swatch').forEach(s => {
+      if (s.dataset.themeKey === String(currentThemeKey)) s.classList.add('active');
+    });
+  }
+
+  function makeSwatch(name, theme, isCustom, key) {
+    const el = document.createElement('div');
+    el.className = 'preset-swatch' + (isCustom ? ' custom' : '') + (theme.light ? ' light' : '');
+    el.dataset.themeKey = key;
+    el.style.background = theme.winBg;
+    el.innerHTML = `
+      <div class="swatch-bar" style="background:${theme.accent}"></div>
+      <div class="swatch-preview">
+        <span style="background:${theme.accent}"></span>
+        <span style="background:${theme.panelBg}"></span>
+        <span style="background:${theme.text}"></span>
+      </div>
+      <div class="swatch-name">${escapeHtml(name)}</div>
+      ${isCustom ? '<div class="swatch-del" title="Удалить тему">×</div>' : ''}
+    `;
+    el.addEventListener('click', (e) => {
+      if (e.target.classList.contains('swatch-del')) return;
+      applyTheme(theme);
+      currentThemeKey = key;
+      document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
+      el.classList.add('active');
+    });
+    if (isCustom) {
+      el.querySelector('.swatch-del').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteCustomTheme(key);
+      });
+    }
+    return el;
+  }
+
+  function createCustomTheme() {
+    const name = document.getElementById('newThemeName').value.trim();
+    if (!name) { showToast('Введи название темы', true); return; }
+    if (customThemes.some(t => t.name.toLowerCase() === name.toLowerCase())) {
+      showToast('Такое имя уже есть', true); return;
+    }
+    if (Object.keys(PRESETS).some(k => k.toLowerCase() === name.toLowerCase())) {
+      showToast('Имя совпадает с пресетом', true); return;
+    }
+    const colors = {
+      light: currentTheme.light,
+      accent: document.getElementById('pickAccent').value,
+      accentBright: currentTheme.accentBright,
+      accentDark: currentTheme.accentDark,
+      winBg: document.getElementById('pickWinBg').value,
+      sidebarBg: document.getElementById('pickSidebar').value,
+      panelBg: document.getElementById('pickPanel').value,
+      inputBg: document.getElementById('pickWinBg').value,
+      border: currentTheme.border,
+      borderStrong: currentTheme.borderStrong,
+      text: document.getElementById('pickText').value,
+      textBright: currentTheme.textBright,
+      textMid: currentTheme.textMid,
+      textDim: currentTheme.textDim,
+      textFaint: currentTheme.textFaint,
+      shadow: currentTheme.shadow,
+      shadowStrong: currentTheme.shadowStrong
+    };
+    const id = Date.now();
+    customThemes.push({ id, name, colors });
+    document.getElementById('newThemeName').value = '';
+    renderPresets();
+    showToast(`Тема "${name}" создана`, false);
+  }
+
+  function deleteCustomTheme(id) {
+    const t = customThemes.find(x => x.id === id);
+    customThemes = customThemes.filter(x => x.id !== id);
+    if (currentThemeKey === id) currentThemeKey = null;
+    renderPresets();
+    showToast(`Тема "${t ? t.name : ''}" удалена`, false);
+  }
+
+  function applyTheme(theme) {
+    currentTheme = { ...theme };
+    setCSSVar('--accent', theme.accent);
+    setCSSVar('--accent-rgb', hexToRgbTuple(theme.accent));
+    setCSSVar('--accent-bright', theme.accentBright);
+    setCSSVar('--accent-dark', theme.accentDark);
+    setCSSVar('--win-bg', theme.winBg);
+    setCSSVar('--win-bg-rgb', hexToRgbTuple(theme.winBg));
+    setCSSVar('--sidebar-bg', theme.sidebarBg);
+    setCSSVar('--sidebar-bg-rgb', hexToRgbTuple(theme.sidebarBg));
+    setCSSVar('--panel-bg', theme.panelBg);
+    setCSSVar('--panel-bg-rgb', hexToRgbTuple(theme.panelBg));
+    setCSSVar('--input-bg', theme.inputBg);
+    setCSSVar('--input-bg-rgb', hexToRgbTuple(theme.inputBg));
+    setCSSVar('--border', theme.border);
+    setCSSVar('--border-strong', theme.borderStrong);
+    setCSSVar('--text', theme.text);
+    setCSSVar('--text-bright', theme.textBright);
+    setCSSVar('--text-mid', theme.textMid);
+    setCSSVar('--text-dim', theme.textDim);
+    setCSSVar('--text-faint', theme.textFaint);
+    setCSSVar('--shadow', theme.shadow);
+    setCSSVar('--shadow-strong', theme.shadowStrong);
+
+    setColorInput('pickAccent', 'fillAccent', 'hexAccent', theme.accent);
+    setColorInput('pickWinBg', 'fillWinBg', 'hexWinBg', theme.winBg);
+    setColorInput('pickSidebar', 'fillSidebar', 'hexSidebar', theme.sidebarBg);
+    setColorInput('pickPanel', 'fillPanel', 'hexPanel', theme.panelBg);
+    setColorInput('pickText', 'fillText', 'hexText', theme.text);
+  }
+
+  function setCSSVar(name, val) {
+    document.documentElement.style.setProperty(name, val);
+  }
+
+  function hexToRgbTuple(hex) {
+    return `${parseInt(hex.slice(1,3),16)}, ${parseInt(hex.slice(3,5),16)}, ${parseInt(hex.slice(5,7),16)}`;
+  }
+
+  function setColorInput(inputId, fillId, hexId, hex) {
+    const inp = document.getElementById(inputId);
+    const fill = document.getElementById(fillId);
+    const hexView = document.getElementById(hexId);
+    if (inp) inp.value = hex;
+    if (fill) fill.style.background = hex;
+    if (hexView) hexView.textContent = hex.toUpperCase();
+  }
+
+  function applyCustomAccent(hex) {
+    currentTheme.accent = hex;
+    setCSSVar('--accent', hex);
+    setCSSVar('--accent-rgb', hexToRgbTuple(hex));
+    document.getElementById('fillAccent').style.background = hex;
+    document.getElementById('hexAccent').textContent = hex.toUpperCase();
+    document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
+    currentThemeKey = null;
+  }
+
+  function applyCustomColor(which, hex) {
+    const map = {
+      winBg: { var: '--win-bg', rgb: '--win-bg-rgb', fill: 'fillWinBg', hex: 'hexWinBg', key: 'winBg' },
+      sidebar: { var: '--sidebar-bg', rgb: '--sidebar-bg-rgb', fill: 'fillSidebar', hex: 'hexSidebar', key: 'sidebarBg' },
+      panel: { var: '--panel-bg', rgb: '--panel-bg-rgb', fill: 'fillPanel', hex: 'hexPanel', key: 'panelBg' },
+      text: { var: '--text', rgb: null, fill: 'fillText', hex: 'hexText', key: 'text' }
+    };
+    const cfg = map[which];
+    setCSSVar(cfg.var, hex);
+    if (cfg.rgb) setCSSVar(cfg.rgb, hexToRgbTuple(hex));
+    document.getElementById(cfg.fill).style.background = hex;
+    document.getElementById(cfg.hex).textContent = hex.toUpperCase();
+    currentTheme[cfg.key] = hex;
+    document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
+    currentThemeKey = null;
+  }
+
+  function applyOpacity(val) {
+    setCSSVar('--win-opacity', parseFloat(val) / 100);
+    document.getElementById('valOpacity').textContent = val + '%';
+  }
+
+  function applyRadius(val) {
+    const v = parseFloat(val);
+    setCSSVar('--radius', v + 'px');
+    setCSSVar('--radius-sm', Math.max(2, v * 0.625) + 'px');
+    setCSSVar('--radius-lg', (v * 1.25) + 'px');
+    document.getElementById('valRadius').textContent = v + ' px';
+  }
+
+  function applyFont(val) {
+    setCSSVar('--font-scale', parseFloat(val) / 100);
+    document.getElementById('valFont').textContent = val + '%';
+  }
+
+  function resetTheme() {
+    applyTheme(PRESETS.white);
+    currentThemeKey = 'white';
+    renderPresets();
+    showToast('Тема сброшена', false);
+  }
+
+  function resetGeometry() {
+    document.getElementById('sliderOpacity').value = 94;
+    document.getElementById('sliderRadius').value = 8;
+    document.getElementById('sliderFont').value = 100;
+    applyOpacity(94); applyRadius(8); applyFont(100);
+    showToast('Геометрия сброшена', false);
+  }
+
+  /* ============================================================
+     AUCTION
+     ============================================================ */
+  let allLots = [];
+
+  function startScan() {
+    const btn = document.getElementById('scanBtn');
+    const btnText = document.getElementById('scanBtnText');
+    const fill = document.getElementById('progressFill');
+    btn.classList.add('scanning');
+    btnText.textContent = 'Сканирую...';
+    fill.style.width = '0%';
+    renderSkeletons();
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 14 + 4;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        allLots = [];
+        finishScan();
+      }
+      fill.style.width = progress + '%';
+    }, 160);
+  }
+
+  function finishScan() {
+    const btn = document.getElementById('scanBtn');
+    const btnText = document.getElementById('scanBtnText');
+    const fill = document.getElementById('progressFill');
+    document.getElementById('statTotal').textContent = allLots.length;
+    document.getElementById('statDeals').textContent = allLots.filter(l => (l.discount || 0) >= 20).length;
+    document.getElementById('statTime').textContent = new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+    btn.classList.remove('scanning');
+    btnText.textContent = 'Сканировать';
+    setTimeout(() => fill.style.width = '0%', 500);
+    renderLots();
+    updateBadge();
+  }
+
+  function renderSkeletons() {
+    const grid = document.getElementById('auctionGrid');
+    let html = '';
+    for (let i = 0; i < 6; i++) {
+      html += `<div class="skel-card">
+        <div class="skel-img"></div>
+        <div class="skel-body">
+          <div class="skel-line"></div>
+          <div class="skel-line short"></div>
+        </div>
+      </div>`;
+    }
+    grid.innerHTML = html;
+  }
+
+  function renderLots() {
+    const grid = document.getElementById('auctionGrid');
+    if (allLots.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          <div class="title">Нет данных</div>
+          <div class="hint">Модуль JNI не получил лоты от игры.<br>После первого пакета карточки появятся здесь.</div>
+        </div>`;
+    }
+  }
+
+  function updateBadge() {
+    const badge = document.getElementById('auctionBadge');
+    const deals = allLots.filter(l => (l.discount || 0) >= 20).length;
+    if (deals > 0) {
+      badge.style.display = 'block';
+      badge.textContent = deals;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  function toggleChk(el) {
+    el.classList.toggle('on');
+    renderLots();
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+  let toastTimer = null;
+  function showToast(text, isError) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastText').textContent = text;
+    toast.classList.toggle('err', !!isError);
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  /* ============================================================
+     ХОТКЕИ
+     ============================================================ */
+  document.addEventListener('keydown', e => {
+    if (capturingEl) return;
+    if (document.activeElement.tagName === 'INPUT') return;
+    if (e.key === 'r' || e.key === 'R') startScan();
+    if (e.key === 'Insert') {
+      menuEl.style.display = menuEl.style.display === 'none' ? 'flex' : 'none';
+    }
+    if (e.key === 'Escape') closeModal();
+  });
+
+  /* ============================================================
+     ПЕРЕТАСКИВАНИЕ
+     ============================================================ */
+  const titlebar = document.getElementById('titlebar');
+  let dragging = false, ox = 0, oy = 0;
+
+  titlebar.addEventListener('mousedown', e => {
+    if (e.target.closest('#closeBtn') || e.target.closest('#minBtn')) return;
+    dragging = true;
+    ox = e.clientX - menuEl.offsetLeft;
+    oy = e.clientY - menuEl.offsetTop;
+  });
+
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    menuEl.style.left = (e.clientX - ox) + 'px';
+    menuEl.style.top = (e.clientY - oy) + 'px';
+  });
+
+  document.addEventListener('mouseup', () => dragging = false);
+
+  document.getElementById('closeBtn').addEventListener('click', () => menuEl.style.display = 'none');
+  document.getElementById('minBtn').addEventListener('click', () => {
+    const body = menuEl.querySelector('.body');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? 'flex' : 'none';
+    menuEl.style.height = hidden ? '500px' : 'auto';
+  });
+
+  /* ============================================================
+     INIT
+     ============================================================ */
+  resizeCanvas();
+  initParticles();
+  drawParticles();
+
+  renderPresets();
+  applyTheme(PRESETS.white);
+  currentThemeKey = 'white';
+  renderPresets();
+  renderConfigs();
+  renderLots();
+
+  // Синхронизация чёрных карточек при старте
+  document.querySelectorAll('.feature').forEach(feat => {
+    const sw = feat.querySelector(':scope > .feature-head > .mini-sw');
+    if (sw && sw.classList.contains('on')) {
+      feat.classList.add('on');
+    }
+  });
+</script>
+</body>
+</html>
