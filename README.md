@@ -1,80 +1,37 @@
-# VV.EXE - STALZONE Cheat Client
+# STALZONE - Master Cheat Client
 
-**COPYRIGHT VV.EXE Development Team 2026. All rights reserved.**
+## 🇷🇺 Инструкция (Русский)
 
-## QUICK START (NO ADMIN REQUIRED)
+Добро пожаловать в STALZONE! Этот клиент полностью автоматизирован. Вам не нужно ничего устанавливать вручную.
 
-### Step 1: Auto Setup
-Run `auto_setup.bat` - it will automatically:
-- Download CMake (portable)
-- Download MinHook
-- Download ImGui
-- Download Il2CppDumper
-- Compile vv.dll
+### Как использовать:
+1. Скачайте проект (Code -> Download ZIP) и распакуйте архив.
+2. Запустите `MasterLauncher.bat`.
+3. Скрипт **автоматически** скачает все необходимые зависимости (CMake, Go, ImGui, MinHook, Extreme Injector) в папку `tools` и скомпилирует чит и инжекторы.
+4. Выберите режим запуска:
+   - **Вариант 1 (Обход UAC):** Запускает игру через Steam с правами администратора без запроса пароля/UAC (через `computerdefaults.exe`). После запуска выберите процесс из списка (от 0 до 50) для автоматической инъекции.
+   - **Вариант 2 (Обычный запуск):** Позволяет выбрать между скрытым Go-инжектором и классическим Extreme Injector v3.
 
-### Step 2: Launch Game with UAC Bypass
-Run `bypass_and_run.bat` - it will:
-- Launch game WITHOUT UAC prompt
-- No admin password needed
-- Uses computerdefaults.exe method
-
-### Step 3: Inject with Extreme Injector v3
-1. Wait for game to reach main menu
-2. Open Extreme Injector v3 (NO ADMIN NEEDED)
-3. Select game process (STALKER.exe or similar)
-4. Add `output\vv.dll`
-5. Click INJECT
-
-### Step 4: Use Cheat
-- **Right Shift** - Toggle menu
-- **Insert** - Toggle menu (backup)
-- **ESC** - Close menu
-
-## ENGINE SUPPORT
-
-This cheat supports:
-- X-Ray Engine (S.T.A.L.K.E.R. series)
+### Поддержка движков:
+- X-Ray Engine (S.T.A.L.K.E.R.)
 - Unreal Engine 4/5
 - Unity (IL2CPP)
 
-The code automatically detects engine type and uses appropriate hooks.
-
-## ANTI-CHEAT BYPASS
-
-For EXBO / EAC / BattlEye:
-- Use Manual Map injection in Extreme Injector
-- Enable "Stealth Inject" option
-- Wait 10 seconds after game start before injecting
-
-## TROUBLESHOOTING
-
-**Menu doesn't open:**
-- Press Right Shift or Insert
-- Check if DLL injected successfully
-
-**Game crashes on inject:**
-- Disable Steam Overlay
-- Use Manual Map injection
-- Inject after reaching main menu
-
-**UAC bypass not working:**
-- Try running bypass_and_run.bat as admin manually
-- Some Windows builds block computerdefaults method
-
-## FILE STRUCTURE
-
-STALZONE/
-- auto_setup.bat       (Auto download and compile)
-- bypass_and_run.bat   (Launch game without UAC)
-- output/vv.dll        (Compiled cheat)
-- src/                 (Source code)
-- libs/                (Downloaded libraries)
-- tools/               (Build tools)
-
-## CONTACT
-
-vv.exe.development@protonmail.com
-
 ---
 
-*VV.EXE Development Team 2026 - All rights reserved*
+## 🇬🇧 Instructions (English)
+
+Welcome to STALZONE! This client is fully automated. You do not need to install any dependencies manually.
+
+### How to use:
+1. Download the project (Code -> Download ZIP) and extract the archive.
+2. Run `MasterLauncher.bat`.
+3. The script will **automatically** download all required dependencies (CMake, Go, ImGui, MinHook, Extreme Injector) into the `tools` folder and compile the cheat and injectors.
+4. Choose your launch mode:
+   - **Option 1 (UAC Bypass):** Launches the game via Steam with elevated privileges without any UAC/password prompts (using `computerdefaults.exe`). Once the game starts, select the process from the list (0-50) for automatic injection.
+   - **Option 2 (Normal Launch):** Allows you to choose between the stealth Go-injector and the classic Extreme Injector v3.
+
+### Engine Support:
+- X-Ray Engine (S.T.A.L.K.E.R.)
+- Unreal Engine 4/5
+- Unity (IL2CPP)
